@@ -23,6 +23,7 @@ This project demonstrates practical SOC analyst skills through a structured 30-d
 
 ## 🏗️ Lab Architecture
 
+
 ```
 [Windows 11 VM + Sysmon]
         |
@@ -42,6 +43,10 @@ This project demonstrates practical SOC analyst skills through a structured 30-d
 - Git / GitHub
 
 ---
+
+Splunk Enterprise:
+: "Initial test ingestion went to the default main index during setup; all project data and searches use dedicated indexes (soc_auth, soc_endpoint, soc_network, soc_web)." This actually shows good documentation practice to a recruiter, not a flaw.
+
 
 ## 📂 Repository Structure
 
@@ -137,8 +142,8 @@ All data used in this project is either:
 - [x] Day 3 — Ingest authentication logs (`soc_auth` / `linux_secure`)
 - [x] Day 4 — Ingest endpoint/Sysmon logs (`soc_endpoint` / `sysmon`)
 - [x] Day 5 — Ingest network and web logs (`soc_network`, `soc_web`), create `dataset_sources.md`
-- [ ] Day 6 — Write SPL basics library (10 searches using index, stats, timechart, dedup, etc.)
-- [ ] Day 7 — Authentication hunts (5 queries: brute force, spray, unusual logins)
+- [X] Day 6 — Write SPL basics library (10 searches using index, stats, timechart, dedup, etc.)
+- [X] Day 7 — Authentication hunts (5 queries: brute force, spray, unusual logins)
 - [ ] Day 8 — Endpoint hunts (5 queries: PowerShell, parent-child, persistence)
 - [ ] Day 9 — Network hunts (5 queries: beaconing, top talkers, rare ports)
 - [ ] Day 10 — Web/proxy hunts (5 queries: status codes, admin probing, rare agents)
