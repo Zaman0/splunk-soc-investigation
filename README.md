@@ -108,9 +108,7 @@ splunk-soc-investigation/
 
 ---
 
-## 📋 Recruiter — Start Here
-
-If you're reviewing this project for a SOC analyst role, here's the recommended reading order:
+## 📋 Recruiter — here's the recommended reading order:
 
 1. **[incident-reports/](./incident-reports/)** — Two complete SOC-style investigation reports showing end-to-end analyst workflow
 2. **[alerts/mitre_mapping.md](./alerts/mitre_mapping.md)** — Full MITRE ATT&CK coverage table
