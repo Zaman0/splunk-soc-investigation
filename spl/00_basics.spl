@@ -1,0 +1,144 @@
+ SPL BASICS LIBRARY — Day 6
+ Project: Splunk SOC Investigation
+ Author: Shahzaman Khan | Jr. SOC L1 Analyst | Tampa, FL
+ Description: Core SPL commands demonstrated across all 4
+ indexes. These form the foundation for all hunting queries.
+ =============================================================
+ Search 1: Basic Index Search with Table and Sort
+ Purpose: List the most recent authentication events in a
+ clean readable format sorted by newest first.
+ Data Source: soc_auth
+ ---------------------------------------------------------------
+index=soc_auth sourcetype=linux_secure
+| table _time host user src_ip action
+| sort -_time
+
+source="tutorialdata.zip:./www3/access.log"
+|table _time host user src_ip action
+| sort -_time
+ ---------------------------------------------------------------
+ Search 2: Stats — Count Events by User
+ Purpose: Count how many authentication events each user
+ generated. High counts may indicate brute force or automation.
+ Data Source: soc_auth
+ ---------------------------------------------------------------
+source="tutorialdata.zip:./www3/access.log"
+| stats count by user
+| sort -count
+ ---------------------------------------------------------------
+ Search 3: Stats — Count by Action (Success vs Failure)
+ Purpose: Get a breakdown of logon successes vs failures.
+ A high failure count relative to success may indicate
+ brute force or password spray activity.
+ Data Source: soc_auth
+ MITRE: T1110 — Brute Force
+ False Positives: Misconfigured services can cause high failures
+ Next Step: Filter on action=failure and investigate top users
+ ---------------------------------------------------------------
+source="tutorialdata.zip:./www3/access.log"
+| stats count by action
+| sort -count
+ ---------------------------------------------------------------
+ Search 4: Timechart — Authentication Events Over Time
+ Purpose: Visualize authentication activity over time.
+ Sudden spikes may indicate an attack or automated tool.
+ Data Source: soc_auth
+ MITRE: T1110 — Brute Force
+ False Positives: Scheduled jobs can cause periodic spikes
+ Next Step: Drill into spike time windows to identify source
+ ---------------------------------------------------------------
+source="tutorialdata.zip:./www3/access.log"
+| timechart span=1h count by action
+ --------------------------------------------------------------
+ Search 5: Dedup — Unique Source IPs Seen in Auth Logs
+ Purpose: List unique source IPs that have attempted
+ authentication. Helps identify unknown or suspicious sources.
+ Data Source: soc_auth
+ MITRE: T1110 — Brute Force
+ False Positives: VPNs and proxies may show unexpected IPs
+ Next Step: Cross-reference IPs against threat intel lookup
+ ---------------------------------------------------------------
+source="tutorialdata.zip:./www3/access.log"
+| dedup host
+| table src_ip host user action
+ ---------------------------------------------------------------
+ Search 6: Rename — Friendly Column Names for Reporting
+ Purpose: Rename raw field names to analyst-friendly labels
+ for clean dashboard panels and incident report screenshots.
+ Data Source: soc_network
+ MITRE: N/A — formatting search
+ False Positives: N/A
+ Next Step: Use this format as base for all dashboard panels
+ ---------------------------------------------------------------
+index=soc_network sourcetype=network
+| rename src_ip as "Source IP"
+          dest_ip as "Destination IP"
+          dest_port as "Port"
+          protocol as "Protocol"
+          action as "Action"
+| table _time "Source IP" "Destination IP" "Port" "Protocol" "Action"
+| sort -_time
+ ---------------------------------------------------------------
+ Search 7: Head — Top 10 Most Recent Web Requests
+ Purpose: Quickly pull the 10 most recent web access events
+ to spot unusual URIs, status codes, or user agents at a glance.
+ Data Source: soc_web
+ MITRE: T1595 — Active Scanning
+ False Positives: Legitimate crawlers and monitoring tools
+ Next Step: Filter on status>=400 for error-based recon
+ ---------------------------------------------------------------
+index=soc_web sourcetype=access_combined
+| table _time src_ip uri status user_agent
+| sort -_time
+| head 10
+index=soc_web sourcetype="access_combined" 
+| search status=400
+| table _time src_ip uri status user_agent
+| sort-_time
+| head 10
+
+ ---------------------------------------------------------------
+ Search 8: Stats with Multiple Functions — Endpoint Summary
+ Purpose: For each host, count total events, count distinct
+ processes, and find the most recent event time. Gives a
+ quick health/activity summary per endpoint.
+ Data Source: soc_endpoint
+ MITRE: N/A — inventory/baseline search
+ False Positives: N/A
+ Next Step: Hosts with unusually high process counts warrant
+ deeper investigation
+ ---------------------------------------------------------------
+index=soc_endpoint sourcetype=sysmon
+| stats count as total_events
+         dc(process) as unique_processes
+         max(_time) as last_seen
+         by host
+| rename last_seen as "Last Seen"
+| convert ctime("Last Seen")
+| sort -total_events
+ ---------------------------------------------------------------
+ Search 9: Timechart — Network Traffic Over Time by Action
+ Purpose: Visualize allowed vs denied network traffic over
+ time. A sudden spike in denied traffic may indicate a
+ scan, brute force, or C2 beacon attempt.
+ Data Source: soc_network
+ MITRE: T1071 — Application Layer Protocol (C2)
+ False Positives: Scheduled backups or software updates
+ Next Step: Drill into denied traffic spikes by src_ip
+ ---------------------------------------------------------------
+index=soc_network sourcetype=network
+| timechart span=1h count by action
+
+ ---------------------------------------------------------------
+ Search 10: Multi-Index Search — Full Environment Overview
+ Purpose: Get a single count of all events across all 4
+ custom indexes broken down by index and sourcetype.
+ Use this to verify data ingestion and spot gaps.
+ Data Source: All indexes
+ MITRE: N/A — environment baseline
+ False Positives: N/A
+ Next Step: If any index shows 0 events, re-check ingestion
+ ---------------------------------------------------------------
+index=soc_auth OR index=soc_endpoint OR index=soc_network OR index=soc_web
+| stats count by index sourcetype
+| sort index
