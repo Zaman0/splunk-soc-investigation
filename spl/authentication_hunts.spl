@@ -1,0 +1,89 @@
+Quer-1
+- Query Name: Brute Force Detection
+- Purpose: Identify accounts under repeated failed logon attack
+- Data Source: index=soc_auth
+- MITRE Technique: T1110.001 - Brute Force: Password Guessing
+- Result: jsmith - 25 failures from 203.0.113.55, then success
+- False Positive Notes: Exclude svc_backup and other service accounts
+- Next Steps: Pivot on src_ip 203.0.113.55, check if external/internal
+
+index=soc_auth action=failure
+| stats count dc(src_ip) as src_count by user
+| where count>=10 OR src_count>=5
+| sort -count
+
+============================================================
+- Query Name: Password Spray Pattern
+- Purpose: Identify a single source attempting logons against many
+   distinct user accounts — a stealthier alternative to
+   brute force that tries to stay under per-account lockout
+   thresholds by spreading attempts across the user base.
+- Data Source: index=soc_auth
+- MITRE Technique: T1110.003 - Brute Force: Password Spraying
+- Result: 198.51.100.77 attempted logons against 8 distinct users (2-3 failures each) within a ~20 minute window
+- False Positive Notes: Shared workstations, VPN concentrators, or NAT gateways can cause many users to appear
+   from one IP legitimately. Cross-check src_ip reputation and whether it's an internal or external address before escalating.
+- Fields Required: action, user, src_ip
+- Next Steps: Pivot on src_ip 198.51.100.77 across soc_network to see if the same IP shows up in other indexes. Check threat
+- intel lookup for src_ip reputation.
+============================================================
+index=soc_auth action=failure
+| stats count dc(user) as user_count by src_ip
+| where user_count>=5
+| sort -user_count
+
+============================================================
+- Query Name: Failed Logon Followed by Success
+- Purpose: Identify accounts that failed multiple logon attempts and then succeeded — the strongest signal of a likely
+   successful brute force or guessed-password compromise, as opposed to a user simply mistyping their own password.
+- Data Source: index=soc_auth
+- MITRE Technique: T1078 - Valid Accounts
+- Results: jsmith (25 failures -> success from 203.0.113.55) and mthompson (6 failures -> success from 10.10.1.99) both appear.
+- False Positive Notes: Legitimate users who forget their password and retry several times before succeeding will also trigger this. 
+  Use failures>=5 as a baseline threshold and tune based on org's normal retry behavior; correlate with src_ip reputation to separate real 
+  incidents from forgetful employees.
+- Fields Required: action, user
+- Next Steps: This is a HIGH PRIORITY finding. Pivot immediately on the user and src_ip to build a full timeline (see Day
+  13 investigation timeline query). Notify account owner and consider forcing a password reset.
+============================================================
+index=soc_auth
+| stats count(eval(action="failure")) as failures
+       count(eval(action="success")) as successes by user
+| where failures>=5 AND successes>=1
+
+============================================================
+- Query Name: New Admin Account Login
+- Purpose: Identify successful logons by privileged/admin accounts, especially via RDP (logon_type=10), which is a 
+  common vector for lateral movement after initial compromise.
+- Data Source: index=soc_auth
+- MITRE Technique: T1078.002 - Valid Accounts: Domain Accounts
+- Sample Result: administrator logged in via RDP from 10.10.1.250 to FILESRV01; admin logged in via RDP from 192.0.2.150 to DC01.
+- False Positive Notes: Scheduled admin maintenance windows, patch deployment tools, or known IT staff RDP sessions will also trigger this. 
+   Maintain an allowlist of expected admin source IPs and maintenance schedules to reduce noise.
+- Fields Required: action, user, logon_type, src_ip, host
+- Next Steps: Verify the src_ip against known internal IT ranges. Any admin RDP session from an unrecognized or external
+  IP into a domain controller should be escalated immediately as a potential lateral movement incident.
+============================================================
+index=soc_auth action=success (user=*admin* OR logon_type=10)
+| table _time user src_ip host logon_type
+| sort -_time
+
+============================================================
+- Query Name: Unusual Login Hour (Off-Hours Logon)
+- Purpose: Identify successful logons occurring outside normal business hours, which may indicate account compromise,
+  insider threat activity, or attacker access from a different timezone.
+- Data Source: index=soc_auth
+- MITRE Technique: T1078 - Valid Accounts
+- Result: rpatel logged in at 02:37 AM; dgarcia logged in at 03:12 AM. svc_backup also appears nightly at 01:00 -
+  expected service account behavior, not a threat.
+- False Positive Notes: Service accounts (backups, batch jobs), night-shift employees, and globally distributed teams will regularly trigger 
+  this. Allowlist known service accounts (e.g. svc_backup, svc_sql) and confirm business hours definition matches with organization.
+- Fields Required: action, user, _time
+- Next Steps: Cross-reference the user's normal login pattern (do they usually log in at this hour?) and check src_ip for geographic/network 
+  anomalies before escalating.
+============================================================
+index=soc_auth action=success
+| eval hour=strftime(_time, "%H")
+| where hour<7 OR hour>19
+| table _time hour user src_ip host
+| sort -_time
