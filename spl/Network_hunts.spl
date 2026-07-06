@@ -1,0 +1,50 @@
+1. High outbound connections (data volume)
+Purpose: Flag hosts sending abnormally large amounts of data outbound — a core exfiltration indicator.
+Data source: Suricata flow/alert logs, soc_network index.
+SPL:
+index=soc_network (event_type=flow OR event_type=alert)
+| stats sum(bytes_toserver) as total_bytes_out, count as conn_count by src_ip, dest_ip
+| where total_bytes_out > 100000000
+| sort - total_bytes_out
+
+2. Rare destination ports
+Purpose: Detect connections to uncommon ports that don't match normal service traffic — often used by backdoors and non-standard C2 listeners.
+Data source: soc_network
+SPL:
+index=soc_network event_type=alert
+| eventstats count as port_freq by dest_port
+| where port_freq <= 3 AND NOT dest_port IN (80,443,53,22,25,110,143,3389)
+| table _time, src_ip, dest_ip, dest_port, proto, signature, action
+| sort dest_port
+
+3. Denied connection bursts (scanning behavior)
+Purpose: Detect a single source hitting many destination ports in a short window and getting blocked — classic port-scan/enumeration signature.
+Data source: soc_network (firewall/IDS denied events)
+SPL:
+splindex=soc_network action=denied
+| bin _time span=1m
+| stats dc(dest_port) as unique_ports, count as attempts by src_ip, dest_ip, _time
+| where unique_ports >= 5
+| sort - unique_ports
+
+4. Beacon-like timing (C2 detection)
+Purpose: Identify hosts contacting the same destination at suspiciously regular, low-variance intervals — the hallmark of automated C2 check-ins.
+Data source: soc_network
+SPL:
+splindex=soc_network event_type=alert dest_ip=*
+| streamstats current=f last(_time) as prev_time by src_ip, dest_ip
+| eval delta=_time-prev_time
+| where isnotnull(delta)
+| stats count as beacon_count, avg(delta) as avg_interval, stdev(delta) as stdev_interval by src_ip, dest_ip
+| where beacon_count >= 5 AND stdev_interval < 5
+| sort - beacon_count
+
+5. Top talkers
+Purpose: Establish a baseline of which hosts generate the most traffic volume, so deviations from normal stand out over time.
+Data source: soc_network
+SPL:
+splindex=soc_network (event_type=flow OR event_type=alert)
+| stats sum(bytes_toserver) as bytes_out, sum(bytes_toclient) as bytes_in, count as conn_count by src_ip
+| eval total_bytes=bytes_out+bytes_in
+| sort - total_bytes
+| head 10

@@ -144,8 +144,8 @@ All data used in this project is either:
 - [x] Day 5 — Ingest network and web logs (`soc_network`, `soc_web`), create `dataset_sources.md`
 - [X] Day 6 — Write SPL basics library (10 searches using index, stats, timechart, dedup, etc.)
 - [X] Day 7 — Authentication hunts (5 queries: brute force, spray, unusual logins)
-- [ ] Day 8 — Endpoint hunts (5 queries: PowerShell, parent-child, persistence)
-- [ ] Day 9 — Network hunts (5 queries: beaconing, top talkers, rare ports)
+- [X] Day 8 — Endpoint hunts (5 queries: PowerShell, parent-child, persistence)
+- [X] Day 9 — Network hunts (5 queries: beaconing, top talkers, rare ports)
 - [ ] Day 10 — Web/proxy hunts (5 queries: status codes, admin probing, rare agents)
 
 ### Phase 2: Investigation Queries (Days 11–15)
