@@ -146,10 +146,10 @@ All data used in this project is either:
 - [X] Day 7 — Authentication hunts (5 queries: brute force, spray, unusual logins)
 - [X] Day 8 — Endpoint hunts (5 queries: PowerShell, parent-child, persistence)
 - [X] Day 9 — Network hunts (5 queries: beaconing, top talkers, rare ports)
-- [ ] Day 10 — Web/proxy hunts (5 queries: status codes, admin probing, rare agents)
+- [X] Day 10 — Web/proxy hunts (5 queries: status codes, admin probing, rare agents)
 
 ### Phase 2: Investigation Queries (Days 11–15)
-- [ ] Day 11 — Document every query with purpose, MITRE mapping, false-positive notes
+- [X] Day 11 — Document every query with purpose, MITRE mapping, false-positive notes
 - [ ] Day 12 — Build threat intel lookup (`suspicious_iocs.csv`)
 - [ ] Day 13 — Build investigation timeline for one suspicious event
 - [ ] Day 14 — Map 8+ detections to MITRE ATT&CK technique IDs
