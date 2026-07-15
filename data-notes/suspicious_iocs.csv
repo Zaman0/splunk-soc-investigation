@@ -1,0 +1,11 @@
+indicator,type,source,severity,first_seen,notes
+203.0.113.45,ip,internal_intel,high,6/1/2026,C2 beacon observed in Day 9 network hunt
+198.51.100.22,ip,osint_feed,critical,5/28/2026,Known Emotet C2 relay
+185.220.101.99,ip,osint_feed,medium,6/10/2026,Tor exit node - possible proxy abuse
+malicious-update[.]net,domain,virustotal,high,6/2/2026,Fake Windows update lure domain
+secure-login-portal[.]com,domain,internal_intel,critical,6/5/2026,Phishing kit hosting domain
+44d88612fea8a8f36de82e1278abb02f,hash,virustotal,critical,5/30/2026,EICAR test signature - malware sim
+e99a18c428cb38d5f260853678922e03,hash,osint_feed,high,6/3/2026,Mimikatz variant hash (Day 11 kill chain)
+hxxp://malicious-update[.]net/payload.exe,url,osint_feed,critical,6/2/2026,Payload download URL tied to same domain
+198.51.100.77,ip,internal_intel,low,6/8/2026,Repeated failed auth source (Day 6 brute force)
+93.184.216.34,ip,osint_feed,medium,6/11/2026,Suspicious outbound beacon interval detected
