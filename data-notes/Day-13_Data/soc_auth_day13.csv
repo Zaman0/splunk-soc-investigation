@@ -1,0 +1,7 @@
+_time,user,host,src_ip,action,status
+2026-06-12 08:14:02,jsmith,WIN10-ANALYST01,203.0.113.45,login,failure
+2026-06-12 08:14:10,jsmith,WIN10-ANALYST01,203.0.113.45,login,failure
+2026-06-12 08:14:18,jsmith,WIN10-ANALYST01,203.0.113.45,login,failure
+2026-06-12 08:14:26,jsmith,WIN10-ANALYST01,203.0.113.45,login,failure
+2026-06-12 08:14:34,jsmith,WIN10-ANALYST01,203.0.113.45,login,failure
+2026-06-12 08:15:47,jsmith,WIN10-ANALYST01,203.0.113.45,login,success

