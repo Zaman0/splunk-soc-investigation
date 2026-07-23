@@ -151,9 +151,9 @@ All data used in this project is either:
 ### Phase 2: Investigation Queries (Days 11–15)
 - [X] Day 11 — Document every query with purpose, MITRE mapping, false-positive notes
 - [X] Day 12 — Build threat intel lookup (`suspicious_iocs.csv`)
-- [ ] Day 13 — Build investigation timeline for one suspicious event
-- [ ] Day 14 — Map 8+ detections to MITRE ATT&CK technique IDs
-- [ ] Day 15 — Peer-style review — remove weak searches, clean SPL library
+- [X] Day 13 — Build investigation timeline for one suspicious event
+- [X] Day 14 — Map 8+ (Added 10) detections to MITRE ATT&CK technique IDs
+- [X] Day 15 — Peer-style review — remove weak searches, clean SPL library
 
 ### Phase 3: Dashboards & Alerts (Days 16–20)
 - [ ] Day 16 — Build authentication dashboard (failed logons, top IPs, unusual hours)
